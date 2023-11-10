@@ -14,8 +14,8 @@ public class SkateMovement : MonoBehaviour
     public float m_CorrectionFactor = 10f;
     public float m_MinSpeed = 0f;
 
-    private bool m_LockedMovement = false; // Lock movement during things like rail grinds
-    private bool m_LockedRotation = false;
+    private bool m_LockedMovement = true;
+    private bool m_LockedRotation = true;
     private bool m_Reorienting;
     private float m_CurrentSpeed;
     private float m_RotationSpeed;
@@ -36,8 +36,14 @@ public class SkateMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        m_Rigidbody.AddForce(transform.forward * m_SpeedScalar * m_CurrentSpeed);
-        m_Rigidbody.AddTorque(transform.up * m_RotationScalar * m_RotationSpeed);
+        if (!m_LockedMovement)
+        {
+            m_Rigidbody.AddForce(transform.forward * m_SpeedScalar * m_CurrentSpeed);
+        }
+        if (!m_LockedRotation)
+        {
+            m_Rigidbody.AddTorque(transform.up * m_RotationScalar * m_RotationSpeed);
+        }
 
         // if we need to reorient, continue flipping
         if (m_Reorienting)
@@ -61,10 +67,10 @@ public class SkateMovement : MonoBehaviour
         }
 
         // if we are below min velocity, set to min velocity
-        if (m_GroundedContacts > 0 && m_Rigidbody.velocity.magnitude < m_MinSpeed)
-        {
-            m_Rigidbody.velocity = transform.forward * m_MinSpeed;
-        }
+        //if (m_GroundedContacts > 0 && m_Rigidbody.velocity.magnitude < m_MinSpeed)
+        //{
+        //    m_Rigidbody.velocity = transform.forward * m_MinSpeed;
+        //}
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -76,6 +82,7 @@ public class SkateMovement : MonoBehaviour
         if (m_GroundedContacts > 0)
         {
             m_LockedMovement = false;
+            m_LockedRotation = false;
         }
     }
     private void OnCollisionExit(Collision collision)
@@ -88,24 +95,19 @@ public class SkateMovement : MonoBehaviour
         if (m_GroundedContacts < 1)
         {
             m_LockedMovement = true;
+            m_LockedRotation = true;
         }
     }
 
     // Set current forward momentum based on input if movement not locked
     void OnAccelerate(InputValue value)
     {
-        if (!m_LockedMovement)
-        {
-            m_CurrentSpeed = value.Get<float>();
-        }
+        m_CurrentSpeed = value.Get<float>();
     }
     // set rotation speed
     void OnTurn(InputValue value)
     {
-        if (!m_LockedRotation)
-        {
-            m_RotationSpeed = value.Get<float>();
-        }
+        m_RotationSpeed = value.Get<float>();
     }
     // add an upwards force
     void OnJump()
