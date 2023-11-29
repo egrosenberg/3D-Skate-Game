@@ -7,46 +7,50 @@ using UnityEngine;
 public class SkateMovement : MonoBehaviour
 {
     public Rigidbody m_Rigidbody;
-    public float m_SpeedScalar = 1f;
+    public GameObject m_BoardMesh;
+    public Wheel[] m_Wheels;
+    public float m_SpeedScalar = 1000f;
     public float m_RotationScalar = 0.1f;
     public float m_MaxSpeed = 7f;
     public float m_JumpStr = 20f;
     public float m_CorrectionFactor = 10f;
     public float m_MinSpeed = 0f;
+    public float m_DownwardForce = 0f;
 
     private bool m_LockedMovement = true;
     private bool m_LockedRotation = true;
+    private bool m_DoingTrick;
     private bool m_Reorienting;
     private float m_CurrentSpeed;
     private float m_RotationSpeed;
-    private float m_OrientTime;
     private int m_GroundedContacts;
 
     void Awake()
     {
         m_Reorienting = false;
+        m_DoingTrick = false;
 
         m_CurrentSpeed = 0f;
         m_RotationSpeed = 0f;
-        m_Rigidbody.maxLinearVelocity = m_MaxSpeed;
-        m_OrientTime = 0f;
         m_GroundedContacts = 0;
     }
 
 
     void FixedUpdate()
     {
-        if (!m_LockedMovement)
+        //if (!m_LockedMovement)
         {
-            m_Rigidbody.AddForce(transform.forward * m_SpeedScalar * m_CurrentSpeed);
-        }
-        if (!m_LockedRotation)
-        {
-            m_Rigidbody.AddTorque(transform.up * m_RotationScalar * m_RotationSpeed);
+            // make each wheel spin
+            foreach (Wheel w in m_Wheels)
+            {
+                w.Accelerate(m_SpeedScalar * m_CurrentSpeed);
+            }
         }
 
+        // check if we need to reorient again but less agressively
+        bool flipped = Math.Abs(transform.rotation.eulerAngles.x) > 180 || Math.Abs(transform.rotation.eulerAngles.z) > 180;
         // if we need to reorient, continue flipping
-        if (m_Reorienting)
+        if (m_Reorienting || flipped)
         {
             // Slerp towards 0 x z
             Quaternion currentRot = transform.rotation;
@@ -66,11 +70,10 @@ public class SkateMovement : MonoBehaviour
             }
         }
 
-        // if we are below min velocity, set to min velocity
-        //if (m_GroundedContacts > 0 && m_Rigidbody.velocity.magnitude < m_MinSpeed)
-        //{
-        //    m_Rigidbody.velocity = transform.forward * m_MinSpeed;
-        //}
+        // Apply downward force on the board to keep it "stickier"(?)
+        // Get CoM in world coords
+        Vector3 CoM = transform.position + m_Rigidbody.centerOfMass;
+        m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, transform.position, ForceMode.Acceleration);
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -108,13 +111,36 @@ public class SkateMovement : MonoBehaviour
     void OnTurn(InputValue value)
     {
         m_RotationSpeed = value.Get<float>();
+        //if (!m_LockedRotation)
+        {
+            // make each wheel steer
+            foreach (Wheel w in m_Wheels)
+            {
+                w.Steer(m_RotationScalar * m_RotationSpeed);
+            }
+        }
     }
     // add an upwards force
     void OnJump()
     {
-        // if not grounded, can't jump
-        if (m_GroundedContacts < 1)
+        // check if any wheels are grounded
+        foreach (Wheel w in m_Wheels)
         {
+            if (w.IsGrounded())
+            {
+                Debug.Log("Grounded");
+                m_LockedMovement = false;
+                break;
+            }
+        }
+        // if not grounded, can't jump
+        if (m_LockedMovement)
+        {
+            //Do a trick if not already doing a flip
+            if (!m_DoingTrick)
+            {
+                Debug.Log("Doing a trick?");
+            }
             return;
         }
         // check if we are upside down
@@ -123,8 +149,7 @@ public class SkateMovement : MonoBehaviour
         {
             Debug.Log("Need to flip");
             m_Reorienting = true;
-            m_OrientTime = 0f;
         }
-        m_Rigidbody.AddForce(Vector3.up * m_JumpStr);
+        m_Rigidbody.AddForce(transform.up * m_JumpStr);
     }
 }
