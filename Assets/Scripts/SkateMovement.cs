@@ -72,8 +72,8 @@ public class SkateMovement : MonoBehaviour
 
         // Apply downward force on the board to keep it "stickier"(?)
         // Get CoM in world coords
-        Vector3 CoM = transform.position + m_Rigidbody.centerOfMass;
-        m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, transform.position, ForceMode.Acceleration);
+        Vector3 CoM = transform.position;// + m_Rigidbody.centerOfMass;
+        m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, CoM, ForceMode.Acceleration);
     }
     private void OnCollisionEnter(Collision collision)
     {
