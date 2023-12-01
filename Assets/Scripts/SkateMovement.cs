@@ -41,10 +41,10 @@ public class SkateMovement : MonoBehaviour
         //if (!m_LockedMovement)
         {
             // make each wheel spin
-            foreach (Wheel w in m_Wheels)
-            {
-                w.Accelerate(m_SpeedScalar * m_CurrentSpeed);
-            }
+            //foreach (Wheel w in m_Wheels)
+            //{
+            //    w.Accelerate(m_SpeedScalar * m_CurrentSpeed);
+            //}
         }
 
         // check if we need to reorient again but less agressively
@@ -106,23 +106,23 @@ public class SkateMovement : MonoBehaviour
     void OnAccelerate(InputValue value)
     {
         m_CurrentSpeed = value.Get<float>();
+        m_Rigidbody.AddForce(m_CurrentSpeed * transform.forward * m_SpeedScalar);
     }
     // set rotation speed
     void OnTurn(InputValue value)
     {
         m_RotationSpeed = value.Get<float>();
-        //if (!m_LockedRotation)
+        // make each wheel steer
+        foreach (Wheel w in m_Wheels)
         {
-            // make each wheel steer
-            foreach (Wheel w in m_Wheels)
-            {
-                w.Steer(m_RotationScalar * m_RotationSpeed);
-            }
+            w.Steer(m_RotationScalar * m_RotationSpeed);
         }
+        
     }
     // add an upwards force
     void OnJump()
     {
+        m_LockedMovement = true;
         // check if any wheels are grounded
         foreach (Wheel w in m_Wheels)
         {
