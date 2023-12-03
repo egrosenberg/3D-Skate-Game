@@ -31,6 +31,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Destabilize",
+                    "type": "PassThrough",
+                    "id": "757a1b11-9783-4f08-ac3c-3e17e21c3494",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -143,6 +152,17 @@
                     "action": "Turn",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "ab51b30c-76c2-4eeb-ac3a-39e3cb615852",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Destabilize",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

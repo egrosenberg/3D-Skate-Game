@@ -48,10 +48,4 @@ public class Wheel : MonoBehaviour
     {
         return m_WheelCollider.isGrounded;
     }
-
-    // returns side slip / extremum slip
-    public string DebugSlip()
-    {
-        return "";// m_WheelCollider m_WheelCollider.sidewaysFriction.extremumSlip;
-    }
 }

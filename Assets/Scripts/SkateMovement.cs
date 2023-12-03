@@ -16,35 +16,49 @@ public class SkateMovement : MonoBehaviour
     public float m_CorrectionFactor = 10f;
     public float m_MinSpeed = 0f;
     public float m_DownwardForce = 0f;
+    public float m_AirPivotScalar = 1f;
+    public float m_MaxAngularV = 50f;
+    public float m_ManualForce = 1f;
+    public float m_ManualSlamScalar = 1f;
+    public float m_ManualSustainScalar = 1f;
 
-    private bool m_LockedMovement = true;
-    private bool m_LockedRotation = true;
-    private bool m_DoingTrick;
     private bool m_Reorienting;
     private float m_CurrentSpeed;
     private float m_RotationSpeed;
     private int m_GroundedContacts;
+    private bool m_Destabilizing;
+    private bool m_Grounded;
 
-    void Awake()
+    private void Start()
     {
         m_Reorienting = false;
-        m_DoingTrick = false;
+        m_Destabilizing = false;
+        m_Grounded = false;
 
         m_CurrentSpeed = 0f;
         m_RotationSpeed = 0f;
         m_GroundedContacts = 0;
+
+        m_Rigidbody.maxAngularVelocity = m_MaxAngularV;
     }
 
 
     void FixedUpdate()
     {
-        //if (!m_LockedMovement)
+        CheckGrounded();
+        // Check if we are destabilizing. If so, pivot midair
+        if (m_Destabilizing)
         {
-            // make each wheel spin
-            //foreach (Wheel w in m_Wheels)
-            //{
-            //    w.Accelerate(m_SpeedScalar * m_CurrentSpeed);
-            //}
+            m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_AirPivotScalar);
+
+            if (m_Grounded)
+            {
+                m_Rigidbody.AddTorque(transform.right * m_ManualSustainScalar);
+            }
+            else
+            {
+                m_Rigidbody.AddTorque(transform.right * m_CurrentSpeed * m_AirPivotScalar);
+            }
         }
 
         // check if we need to reorient again but less agressively
@@ -75,38 +89,36 @@ public class SkateMovement : MonoBehaviour
         Vector3 CoM = transform.position;// + m_Rigidbody.centerOfMass;
         m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, CoM, ForceMode.Acceleration);
     }
-    private void OnCollisionEnter(Collision collision)
+
+    // Check each wheel to see if its currently grounded
+    // Update grounded status and count appropriately
+    private void CheckGrounded()
     {
-        if (collision.gameObject.tag == "ground")
+        // Reset Grounded Status
+        m_Grounded = false;
+        m_GroundedContacts = 0;
+        // Check each wheel
+        foreach (Wheel w in m_Wheels)
         {
-            m_GroundedContacts++;
-            Debug.Log("Touching: " + m_GroundedContacts);
-        }
-        if (m_GroundedContacts > 0)
-        {
-            m_LockedMovement = false;
-            m_LockedRotation = false;
-        }
-    }
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.tag == "ground")
-        {
-            m_GroundedContacts--;
-            Debug.Log("Touching: " + m_GroundedContacts);
-        }
-        if (m_GroundedContacts < 1)
-        {
-            m_LockedMovement = true;
-            m_LockedRotation = true;
+            if (w.IsGrounded())
+            {
+                m_Grounded = true;
+                m_GroundedContacts++;
+            }
         }
     }
 
     // Set current forward momentum based on input if movement not locked
     void OnAccelerate(InputValue value)
     {
+        CheckGrounded();
+
         m_CurrentSpeed = value.Get<float>();
-        m_Rigidbody.AddForce(m_CurrentSpeed * transform.forward * m_SpeedScalar);
+
+        if (m_Grounded)
+        {
+            m_Rigidbody.AddForce(m_CurrentSpeed * transform.forward * m_SpeedScalar);
+        }
     }
     // set rotation speed
     void OnTurn(InputValue value)
@@ -122,34 +134,38 @@ public class SkateMovement : MonoBehaviour
     // add an upwards force
     void OnJump()
     {
-        m_LockedMovement = true;
         // check if any wheels are grounded
-        foreach (Wheel w in m_Wheels)
-        {
-            if (w.IsGrounded())
-            {
-                Debug.Log("Grounded");
-                m_LockedMovement = false;
-                break;
-            }
-        }
+        CheckGrounded();
         // if not grounded, can't jump
-        if (m_LockedMovement)
+        if (!m_Grounded)
         {
-            //Do a trick if not already doing a flip
-            if (!m_DoingTrick)
-            {
-                Debug.Log("Doing a trick?");
-            }
             return;
         }
-        // check if we are upside down
-        bool flipped = Math.Abs(transform.rotation.eulerAngles.x) > 90 || Math.Abs(transform.rotation.eulerAngles.z) > 90;
-        if (flipped)
-        {
-            Debug.Log("Need to flip");
-            m_Reorienting = true;
-        }
         m_Rigidbody.AddForce(transform.up * m_JumpStr);
+    }
+
+    /**
+     * Update status of Destabilizing bool
+     * attempt to lift nose if currently grounded
+     * 
+     * Pending: Slam ground on exit? (Not sure if this is actually going to help or hurt)
+     */
+    void OnDestabilize(InputValue value)
+    {
+        CheckGrounded();
+
+        m_Destabilizing = value.Get<float>() > 0;
+
+        if (m_Grounded)
+        {
+            if (m_Destabilizing)
+            {
+                m_Rigidbody.AddTorque(transform.right * m_ManualForce);
+            }
+            else
+            {
+                m_Rigidbody.AddTorque(transform.right * m_ManualForce * m_ManualSlamScalar);
+            }
+        }
     }
 }

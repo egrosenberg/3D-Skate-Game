@@ -22819,12 +22819,16 @@ PrefabInstance:
       value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 76644575688813027, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_Size.y
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 76644575688813027, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_Size.z
-      value: 0.6
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 76644575688813027, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_Center.y
-      value: 0.04
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 76644575688813027, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_Center.z
@@ -22860,7 +22864,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1150166239441488629, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1.8
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1649268008664346235, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_Radius
@@ -22888,7 +22892,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1649268008664346235, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1.8
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2068633741013536102, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4869731944611120152, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_LocalScale.y
@@ -22940,7 +22948,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6108133857206434173, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1.8
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_ManualForce
+      value: -4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_MaxAngularV
+      value: 4.5
       objectReference: {fileID: 0}
     - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_SpeedScalar
@@ -22949,6 +22965,18 @@ PrefabInstance:
     - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_DownwardForce
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_AirPivotScalar
+      value: 30000
+      objectReference: {fileID: 0}
+    - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_ManualSlamScalar
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_ManualSustainScalar
+      value: -2000
       objectReference: {fileID: 0}
     - target: {fileID: 6432780443908161919, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_LocalScale.y
@@ -22984,11 +23012,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7773203468654036614, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_CenterOfMass.y
-      value: -0.5
+      value: -0.185
       objectReference: {fileID: 0}
     - target: {fileID: 7773203468654036614, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_CenterOfMass.z
-      value: -0.05
+      value: -0.2
       objectReference: {fileID: 0}
     - target: {fileID: 8465044319625993162, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_Name
@@ -23020,7 +23048,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8550692316257785622, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 1.8
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9057158509208705484, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_LocalScale.y
