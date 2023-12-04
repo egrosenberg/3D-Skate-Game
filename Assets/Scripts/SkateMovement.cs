@@ -8,6 +8,7 @@ public class SkateMovement : MonoBehaviour
 {
     public Rigidbody m_Rigidbody;
     public GameObject m_BoardMesh;
+    public ConstantForce m_ManualSustain;
     public Wheel[] m_Wheels;
     public float m_SpeedScalar = 1000f;
     public float m_RotationScalar = 0.1f;
@@ -22,30 +23,54 @@ public class SkateMovement : MonoBehaviour
     public float m_ManualSlamScalar = 1f;
     public float m_ManualSustainScalar = 1f;
 
-    private bool m_Reorienting;
-    private float m_CurrentSpeed;
-    private float m_RotationSpeed;
-    private int m_GroundedContacts;
-    private bool m_Destabilizing;
-    private bool m_Grounded;
+    private bool        m_Reorienting;        // If the board currently needs to reorient itself
+    private float       m_CurrentSpeed;       // Speed for forward input
+    private float       m_RotationSpeed;      // Speed the rotation input is at
+    private int         m_GroundedContacts;   // Number of wheels touching the ground
+    private bool        m_Destabilizing;      // If the board is currently in destabilizing mode
+    private bool        m_Grounded;           // If the board currently has any wheels touching the ground
+    private bool        m_Jumping;            // True if player has recently pressed jump input
+    private Quaternion  m_JumpRotation;       // Angle board was at as it left for a jump
 
     private void Start()
     {
+        // Initialize all our variables to 0
         m_Reorienting = false;
         m_Destabilizing = false;
         m_Grounded = false;
+        m_Jumping = false;
 
         m_CurrentSpeed = 0f;
         m_RotationSpeed = 0f;
         m_GroundedContacts = 0;
 
+        // Initialize Jump rotation to starting position
+        m_JumpRotation = transform.rotation;
+
+        // Set max angular velocity to provided value
         m_Rigidbody.maxAngularVelocity = m_MaxAngularV;
     }
 
 
     void FixedUpdate()
     {
+        bool wasAirborn = !m_Grounded;
         CheckGrounded();
+
+        // If we just landed, snap to rotation based on recorded value
+        if (m_Jumping && (wasAirborn && m_Grounded))
+        {
+            Quaternion currentRotation = transform.rotation;
+            Vector3 currentEulers = currentRotation.eulerAngles;
+            currentEulers.y = m_JumpRotation.eulerAngles.y;
+            currentRotation.eulerAngles = currentEulers;
+            transform.rotation = currentRotation;
+            // Stop board from continuing to rotate
+            m_Rigidbody.angularVelocity = Vector3.zero;
+            // Mark that we have landed
+            m_Jumping = false;
+        }
+        
         // Check if we are destabilizing. If so, pivot midair
         if (m_Destabilizing)
         {
@@ -53,7 +78,7 @@ public class SkateMovement : MonoBehaviour
 
             if (m_Grounded)
             {
-                m_Rigidbody.AddTorque(transform.right * m_ManualSustainScalar);
+                m_ManualSustain.torque = transform.right * m_ManualSustainScalar;
             }
             else
             {
@@ -141,6 +166,10 @@ public class SkateMovement : MonoBehaviour
         {
             return;
         }
+        // Record current rotation
+        m_JumpRotation = transform.rotation;
+        // Make jump
+        m_Jumping = true;
         m_Rigidbody.AddForce(transform.up * m_JumpStr);
     }
 
@@ -166,6 +195,10 @@ public class SkateMovement : MonoBehaviour
             {
                 m_Rigidbody.AddTorque(transform.right * m_ManualForce * m_ManualSlamScalar);
             }
+        }
+        if (!m_Destabilizing)
+        {
+            m_ManualSustain.torque = Vector3.zero;
         }
     }
 }
