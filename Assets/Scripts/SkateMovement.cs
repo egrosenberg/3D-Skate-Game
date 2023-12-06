@@ -30,6 +30,7 @@ public class SkateMovement : MonoBehaviour
     private bool        m_Destabilizing;      // If the board is currently in destabilizing mode
     private bool        m_Grounded;           // If the board currently has any wheels touching the ground
     private bool        m_Jumping;            // True if player has recently pressed jump input
+    private bool        m_Grinding;           // True if player is currently in the middle of a grind
     private Quaternion  m_JumpRotation;       // Angle board was at as it left for a jump
 
     private void Start()
@@ -200,5 +201,14 @@ public class SkateMovement : MonoBehaviour
         {
             m_ManualSustain.torque = Vector3.zero;
         }
+    }
+
+    /**
+     * Called whenever the board makes contact with a rail
+     * Records rotation so that it lands accordingly
+     */
+    public void OnGrind()
+    {
+        
     }
 }

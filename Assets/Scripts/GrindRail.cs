@@ -7,6 +7,7 @@ public class GrindRail : MonoBehaviour
     public float m_GrindCooldown = 10f;
     public float m_Speed = 1f;
     public float m_LaunchSpeed = 10f;
+    public bool m_LockRotation = true;
     public char m_Direction = 'x';
     public GameObject[] m_Nodes;
 
@@ -19,6 +20,8 @@ public class GrindRail : MonoBehaviour
     private bool m_GrindingDirection;
     private Vector3 m_PrevPos;
     private Vector3 m_NextPos;
+    private Quaternion m_PrevRotation;
+    private Quaternion m_NextRotation;
     private GameObject m_GrindingPlayer;
 
     // Start is called before the first frame update
@@ -45,10 +48,17 @@ public class GrindRail : MonoBehaviour
             // Check if player is at intended position
             if (m_GrindingPlayer.transform.position != m_NextPos)
             {
+                // Lerp position and rotation to next node
                 m_GrindingPlayer.transform.position = Vector3.Lerp(m_PrevPos, m_NextPos, m_GrindTimer);
+                // Only rotate if the rail is told to rotate the board
+                if (m_LockRotation)
+                {
+                    m_GrindingPlayer.transform.rotation = Quaternion.Lerp(m_PrevRotation, m_NextRotation, m_GrindTimer);
+                }
             }
             else
             {
+                // Check if we should continue grinding
                 bool cont = false;
                 cont |= m_GrindingDirection && m_CurrentNode < m_FinishNode - 1;
                 cont |= !m_GrindingDirection && m_CurrentNode > m_FinishNode + 1;
@@ -146,8 +156,11 @@ public class GrindRail : MonoBehaviour
         cont |= !m_GrindingDirection && m_CurrentNode > m_FinishNode;
         if (cont)
         {
+            // Update previous and current nodes
             m_PrevPos = m_Nodes[m_CurrentNode].transform.position;
+            m_PrevRotation = m_Nodes[m_CurrentNode].transform.rotation;
             m_NextPos = m_Nodes[m_CurrentNode + (m_GrindingDirection ? 1 : -1)].transform.position;
+            m_NextRotation = m_Nodes[m_CurrentNode + (m_GrindingDirection ? 1 : -1)].transform.rotation;
         }
     }
 }
