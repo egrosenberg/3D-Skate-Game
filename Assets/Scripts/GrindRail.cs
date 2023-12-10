@@ -70,6 +70,8 @@ public class GrindRail : MonoBehaviour
                 else
                 {
                     m_Grinding = false;
+                    // Set Player internal grinding flag
+                    m_GrindingPlayer.GetComponent<SkateMovement>().OnGrindEnd();
                     Rigidbody playerRigidbody = m_GrindingPlayer.GetComponent<Rigidbody>();
                     playerRigidbody.isKinematic = false;
                     playerRigidbody.AddForce(Vector3.forward * m_LaunchSpeed * (m_GrindingDirection ? 1: -1), ForceMode.VelocityChange);
@@ -78,23 +80,40 @@ public class GrindRail : MonoBehaviour
         }
     }
 
+    /**
+     * Called whenever something enters the trigger collider
+     * Check to make sure that no one is grinding and that it is a player grinding
+     * 
+     * Set flags and find start and end nodes
+     */
     void OnTriggerEnter(Collider collision)
     {
+        // Verify we are able and should begin grind
         if (!m_Grinding && collision.gameObject.CompareTag("player"))
         {
+            // If we are on cooldown, dont grind
             if (Time.time < m_ReactivateTime)
             {
                 return;
             }
+            // Set grinding flag, update time to reactivate
             m_Grinding = true;
             m_ReactivateTime = Time.time + m_GrindCooldown;
+            // Set player member variable
             m_GrindingPlayer = collision.gameObject;
+            // Set Player internal grinding flags
+            m_GrindingPlayer.GetComponent<SkateMovement>().OnGrind(!m_LockRotation);
+            // Check player current direction
             CheckDirection(m_GrindingPlayer);
+            // Get player's rigidbody and set to kinematic
             m_GrindingPlayer.GetComponent<Rigidbody>().isKinematic = true;
+            // Find start node from player pos, find end node from direction
             m_StartNode = FindNearestNode(m_GrindingPlayer.transform.position);
             m_FinishNode = m_GrindingDirection ? m_Nodes.Length - 1 : 0;
             m_CurrentNode = m_StartNode;
             UpdateNode();
+            // Make player lerp from current position instead of snapping to start node
+            m_PrevPos = m_GrindingPlayer.transform.position;
         }
     }
 
@@ -134,6 +153,7 @@ public class GrindRail : MonoBehaviour
         int nearest = 0;
         float nearestDistance = float.PositiveInfinity;
 
+        // Check each node and calc distance
         for (int i = 0; i < m_Nodes.Length; ++i)
         {
             Vector3 diff = m_Nodes[i].transform.position - position;
@@ -161,6 +181,11 @@ public class GrindRail : MonoBehaviour
             m_PrevRotation = m_Nodes[m_CurrentNode].transform.rotation;
             m_NextPos = m_Nodes[m_CurrentNode + (m_GrindingDirection ? 1 : -1)].transform.position;
             m_NextRotation = m_Nodes[m_CurrentNode + (m_GrindingDirection ? 1 : -1)].transform.rotation;
+            if (!m_GrindingDirection)
+            {
+                m_PrevRotation = Quaternion.Euler(m_PrevRotation.eulerAngles.x, m_PrevRotation.eulerAngles.y + 180, m_PrevRotation.eulerAngles.z);
+                m_NextRotation = Quaternion.Euler(m_NextRotation.eulerAngles.x, m_NextRotation.eulerAngles.y + 180, m_NextRotation.eulerAngles.z);
+            }
         }
     }
 }

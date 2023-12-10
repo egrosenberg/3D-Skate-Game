@@ -18,19 +18,23 @@ public class SkateMovement : MonoBehaviour
     public float m_MinSpeed = 0f;
     public float m_DownwardForce = 0f;
     public float m_AirPivotScalar = 1f;
+    public float m_GrindPivotScalar = 20f;
     public float m_MaxAngularV = 50f;
     public float m_ManualForce = 1f;
     public float m_ManualSlamScalar = 1f;
     public float m_ManualSustainScalar = 1f;
+    public float m_AccelerateInterval = 0.5f;
 
     private bool        m_Reorienting;        // If the board currently needs to reorient itself
     private float       m_CurrentSpeed;       // Speed for forward input
     private float       m_RotationSpeed;      // Speed the rotation input is at
+    private float       m_NextAccelerate;     // Used to track when to next push the board
     private int         m_GroundedContacts;   // Number of wheels touching the ground
     private bool        m_Destabilizing;      // If the board is currently in destabilizing mode
     private bool        m_Grounded;           // If the board currently has any wheels touching the ground
     private bool        m_Jumping;            // True if player has recently pressed jump input
     private bool        m_Grinding;           // True if player is currently in the middle of a grind
+    private bool        m_GrindingCanRotate;  // Used to decide whether or not to respect rotation input while grinding
     private Quaternion  m_JumpRotation;       // Angle board was at as it left for a jump
 
     private void Start()
@@ -40,10 +44,13 @@ public class SkateMovement : MonoBehaviour
         m_Destabilizing = false;
         m_Grounded = false;
         m_Jumping = false;
+        m_Grinding = false;
+        m_GrindingCanRotate = false;
 
         m_CurrentSpeed = 0f;
         m_RotationSpeed = 0f;
         m_GroundedContacts = 0;
+        m_NextAccelerate = Time.time;
 
         // Initialize Jump rotation to starting position
         m_JumpRotation = transform.rotation;
@@ -71,27 +78,44 @@ public class SkateMovement : MonoBehaviour
             // Mark that we have landed
             m_Jumping = false;
         }
-        
+        // Accelerate if grounded
+        if (m_Grounded && !m_Destabilizing && Time.time >= m_NextAccelerate && m_Rigidbody.velocity.magnitude < m_MaxSpeed)
+        {
+            m_Rigidbody.AddForce(m_CurrentSpeed * transform.forward * m_SpeedScalar);
+            m_NextAccelerate = Time.time + m_AccelerateInterval;
+        }
+
         // Check if we are destabilizing. If so, pivot midair
         if (m_Destabilizing)
         {
-            m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_AirPivotScalar);
-
-            if (m_Grounded)
+            if (m_Grinding)
             {
-                m_ManualSustain.torque = transform.right * m_ManualSustainScalar;
+                if (m_GrindingCanRotate)
+                {
+                    m_BoardMesh.transform.Rotate(Vector3.up * m_GrindPivotScalar * m_RotationSpeed);
+                }
             }
             else
             {
-                m_Rigidbody.AddTorque(transform.right * m_CurrentSpeed * m_AirPivotScalar);
+                m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_AirPivotScalar);
+
+                if (m_Grounded)
+                {
+                    m_ManualSustain.torque = transform.right * m_ManualSustainScalar;
+                }
+                else
+                {
+                    m_Rigidbody.AddTorque(transform.right * m_CurrentSpeed * m_AirPivotScalar);
+                }
             }
         }
 
         // check if we need to reorient again but less agressively
-        bool flipped = Math.Abs(transform.rotation.eulerAngles.x) > 180 || Math.Abs(transform.rotation.eulerAngles.z) > 180;
+        bool flipped = !m_Destabilizing && (Math.Abs(transform.rotation.eulerAngles.x) > 180 || Math.Abs(transform.rotation.eulerAngles.z) > 180);
         // if we need to reorient, continue flipping
         if (m_Reorienting || flipped)
         {
+            m_Reorienting = true;
             // Slerp towards 0 x z
             Quaternion currentRot = transform.rotation;
             Quaternion targetRot = currentRot;
@@ -141,9 +165,10 @@ public class SkateMovement : MonoBehaviour
 
         m_CurrentSpeed = value.Get<float>();
 
-        if (m_Grounded)
+        if (m_Grounded && Time.time >= m_NextAccelerate && m_Rigidbody.velocity.magnitude < m_MaxSpeed)
         {
             m_Rigidbody.AddForce(m_CurrentSpeed * transform.forward * m_SpeedScalar);
+            m_NextAccelerate = Time.time + m_AccelerateInterval;
         }
     }
     // set rotation speed
@@ -205,10 +230,15 @@ public class SkateMovement : MonoBehaviour
 
     /**
      * Called whenever the board makes contact with a rail
-     * Records rotation so that it lands accordingly
      */
-    public void OnGrind()
+    public void OnGrind(bool canRotate)
     {
-        
+        m_Grinding = true;
+        m_GrindingCanRotate = canRotate;
+    }
+    public void OnGrindEnd()
+    {
+        m_Grinding = false;
+        m_BoardMesh.transform.localRotation = Quaternion.Euler(Vector3.zero);
     }
 }
