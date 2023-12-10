@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: bb8e42b2db276aa4c841121798e10934
+=======
+guid: f4eec1ce2be07ef4e99a849828bfa230
+>>>>>>> map-and-ui
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
