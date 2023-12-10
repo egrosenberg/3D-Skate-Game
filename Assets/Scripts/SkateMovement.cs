@@ -24,6 +24,7 @@ public class SkateMovement : MonoBehaviour
     public float m_ManualSlamScalar = 1f;
     public float m_ManualSustainScalar = 1f;
     public float m_AccelerateInterval = 0.5f;
+    public Vector3 m_CenterOfMass = Vector3.zero;
 
     private bool        m_Reorienting;        // If the board currently needs to reorient itself
     private float       m_CurrentSpeed;       // Speed for forward input
@@ -55,8 +56,8 @@ public class SkateMovement : MonoBehaviour
         // Initialize Jump rotation to starting position
         m_JumpRotation = transform.rotation;
 
-        // Set max angular velocity to provided value
         m_Rigidbody.maxAngularVelocity = m_MaxAngularV;
+        m_Rigidbody.centerOfMass = m_CenterOfMass;
     }
 
 
