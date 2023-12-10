@@ -17,6 +17,8 @@ public class CameraArm : MonoBehaviour
     void FixedUpdate()
     {
         transform.position = Vector3.Slerp(transform.position, m_BoardObject.transform.position, Time.deltaTime * m_FollowSpeed);
-        transform.rotation = Quaternion.Slerp(transform.rotation, m_BoardObject.transform.rotation, Time.deltaTime * m_OrbitSpeed);
+        Quaternion targetRotation = Quaternion.Slerp(transform.rotation, m_BoardObject.transform.rotation, Time.deltaTime * m_OrbitSpeed);
+        targetRotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
+        transform.rotation = targetRotation;
     }
 }
