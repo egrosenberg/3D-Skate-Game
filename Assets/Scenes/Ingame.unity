@@ -836,6 +836,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+      propertyPath: m_BoardMesh
+      value: 
+      objectReference: {fileID: 1802821232}
+    - target: {fileID: 6357095644142969179, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
       propertyPath: m_ConstantForceScalar
       value: -75000
       objectReference: {fileID: 0}
@@ -7707,6 +7711,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1773418046}
   m_CullTransparentMesh: 1
+--- !u!1 &1802821232 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6181324482741873446, guid: fe936718407599b4f973f4c5d84b5962, type: 3}
+  m_PrefabInstance: {fileID: 206877048}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1847023220
 GameObject:
   m_ObjectHideFlags: 0
@@ -25461,6 +25470,7 @@ GameObject:
   - component: {fileID: 5992645786430883407}
   - component: {fileID: 1916941041923480358}
   - component: {fileID: 8836512842011432882}
+  - component: {fileID: 8836512842011432883}
   m_Layer: 0
   m_Name: Coffe table
   m_TagString: Untagged
@@ -26170,6 +26180,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &8836512842011432883
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7272382086274767746}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 5674303542495312313, guid: 2aea71b0a80073848b4d061148ff9d00, type: 3}
 --- !u!1 &8837948502434958634
 GameObject:
   m_ObjectHideFlags: 0
