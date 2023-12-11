@@ -9,6 +9,7 @@ public class GrindRail : MonoBehaviour
     public float m_LaunchSpeed = 10f;
     public bool m_LockRotation = true;
     public char m_Direction = 'x';
+    public GameObject[] m_PairedRails;
     public GameObject[] m_Nodes;
 
     private int m_CurrentNode;
@@ -50,7 +51,7 @@ public class GrindRail : MonoBehaviour
             {
                 // Lerp position and rotation to next node
                 m_GrindingPlayer.transform.position = Vector3.Lerp(m_PrevPos, m_NextPos, m_GrindTimer);
-                // Only rotate if the rail is told to rotate the board
+                // only rotate if locked rotation
                 if (m_LockRotation)
                 {
                     m_GrindingPlayer.transform.rotation = Quaternion.Lerp(m_PrevRotation, m_NextRotation, m_GrindTimer);
@@ -71,6 +72,7 @@ public class GrindRail : MonoBehaviour
                 {
                     m_Grinding = false;
                     m_ReactivateTime = Time.time + m_GrindCooldown;
+                    UpdatePaired();
                     // Set Player internal grinding flag
                     m_GrindingPlayer.transform.rotation = m_NextRotation;
                     m_GrindingPlayer.GetComponent<SkateMovement>().OnGrindEnd();
@@ -98,11 +100,17 @@ public class GrindRail : MonoBehaviour
             {
                 return;
             }
+            // Set player member variable
+            m_GrindingPlayer = collision.gameObject;
+            // Check if player is already grinding
+            if (m_GrindingPlayer.GetComponent<SkateMovement>().IsGrinding())
+            {
+                return;
+            }
             // Set grinding flag, update time to reactivate
             m_Grinding = true;
             m_ReactivateTime = float.PositiveInfinity;
-            // Set player member variable
-            m_GrindingPlayer = collision.gameObject;
+            UpdatePaired();
             // Set Player internal grinding flags
             m_GrindingPlayer.GetComponent<SkateMovement>().OnGrind(!m_LockRotation);
             // Check player current direction
@@ -189,5 +197,24 @@ public class GrindRail : MonoBehaviour
                 m_NextRotation = Quaternion.Euler(m_NextRotation.eulerAngles.x, m_NextRotation.eulerAngles.y + 180, m_NextRotation.eulerAngles.z);
             }
         }
+    }
+
+    private void UpdatePaired()
+    {
+        foreach (GameObject obj in m_PairedRails)
+        {
+            GrindRail rail = obj.GetComponent<GrindRail>();
+            rail.SetGrinding(m_Grinding);
+            rail.SetReactivate(m_ReactivateTime);
+        }
+    }
+
+    public void SetGrinding(bool status)
+    {
+        m_Grinding = status;
+    }
+    public void SetReactivate(float time)
+    {
+        m_ReactivateTime = time;
     }
 }
