@@ -19,6 +19,7 @@ public class GrindRail : MonoBehaviour
     private float m_ReactivateTime;
     private bool m_Grinding;
     private bool m_GrindingDirection;
+    private bool m_Locked;
     private Vector3 m_PrevPos;
     private Vector3 m_NextPos;
     private Quaternion m_PrevRotation;
@@ -31,6 +32,7 @@ public class GrindRail : MonoBehaviour
         m_Grinding = false;
         m_GrindingDirection = true;
         m_GrindingPlayer = null;
+        m_Locked = false;
 
         m_CurrentNode = 0;
         m_StartNode = 0;
@@ -96,7 +98,7 @@ public class GrindRail : MonoBehaviour
         if (!m_Grinding && collision.gameObject.CompareTag("player"))
         {
             // If we are on cooldown, dont grind
-            if (Time.time < m_ReactivateTime)
+            if (Time.time < m_ReactivateTime || m_Locked)
             {
                 return;
             }
@@ -107,10 +109,6 @@ public class GrindRail : MonoBehaviour
             {
                 return;
             }
-            // Set grinding flag, update time to reactivate
-            m_Grinding = true;
-            m_ReactivateTime = float.PositiveInfinity;
-            UpdatePaired();
             // Set Player internal grinding flags
             m_GrindingPlayer.GetComponent<SkateMovement>().OnGrind(!m_LockRotation);
             // Check player current direction
@@ -124,6 +122,10 @@ public class GrindRail : MonoBehaviour
             UpdateNode();
             // Make player lerp from current position instead of snapping to start node
             m_PrevPos = m_GrindingPlayer.transform.position;
+            // Set grinding flag, update time to reactivate
+            m_Grinding = true;
+            m_ReactivateTime = float.PositiveInfinity;
+            UpdatePaired();
         }
     }
 
@@ -204,14 +206,14 @@ public class GrindRail : MonoBehaviour
         foreach (GameObject obj in m_PairedRails)
         {
             GrindRail rail = obj.GetComponent<GrindRail>();
-            rail.SetGrinding(m_Grinding);
+            rail.SetLocked(m_Grinding);
             rail.SetReactivate(m_ReactivateTime);
         }
     }
 
-    public void SetGrinding(bool status)
+    public void SetLocked(bool status)
     {
-        m_Grinding = status;
+        m_Locked = status;
     }
     public void SetReactivate(float time)
     {
