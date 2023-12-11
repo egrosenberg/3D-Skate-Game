@@ -8,21 +8,24 @@ public class SkateMovement : MonoBehaviour
 {
     public Rigidbody m_Rigidbody;
     public GameObject m_BoardMesh;
-    public ConstantForce m_ManualSustain;
+    public ConstantForce m_ConstantForce;
     public Wheel[] m_Wheels;
     public float m_SpeedScalar = 1000f;
+    public float m_BoostScalar = 1000f;
     public float m_RotationScalar = 0.1f;
     public float m_MaxSpeed = 7f;
     public float m_JumpStr = 20f;
     public float m_CorrectionFactor = 10f;
     public float m_MinSpeed = 0f;
     public float m_DownwardForce = 0f;
-    public float m_AirPivotScalar = 1f;
+    public float m_PivotTorqueScalar = 10f;
+    public float m_PivotRotateScalar = 6f;
+    public float m_ForwardPivotScalar = 2f;
     public float m_GrindPivotScalar = 20f;
     public float m_MaxAngularV = 50f;
     public float m_ManualForce = 1f;
     public float m_ManualSlamScalar = 1f;
-    public float m_ManualSustainScalar = 1f;
+    public float m_ConstantForceScalar = 1f;
     public float m_AccelerateInterval = 0.5f;
     public Vector3 m_CenterOfMass = Vector3.zero;
 
@@ -66,18 +69,25 @@ public class SkateMovement : MonoBehaviour
         bool wasAirborn = !m_Grounded;
         CheckGrounded();
 
-        // If we just landed, snap to rotation based on recorded value
-        if (m_Jumping && (wasAirborn && m_Grounded))
+        // If grounded, apply constant downard force
+        if (m_Grounded && !m_Destabilizing)
         {
-            Quaternion currentRotation = transform.rotation;
-            Vector3 currentEulers = currentRotation.eulerAngles;
-            currentEulers.y = m_JumpRotation.eulerAngles.y;
-            currentRotation.eulerAngles = currentEulers;
-            transform.rotation = currentRotation;
+            m_ConstantForce.relativeForce = new Vector3(m_ConstantForce.relativeForce.x, m_DownwardForce, m_ConstantForce.relativeForce.z);
+        }
+        
+        // If we just landed:
+        if (wasAirborn && m_Grounded)
+        {
             // Stop board from continuing to rotate
             m_Rigidbody.angularVelocity = Vector3.zero;
-            // Mark that we have landed
-            m_Jumping = false;
+            // If we just landed from an inputted jump, snap to rotation based on recorded value
+            if (m_Jumping)
+            {
+                Vector3 currentEulers = transform.rotation.eulerAngles;
+                transform.rotation = Quaternion.Euler(currentEulers.x, m_JumpRotation.eulerAngles.y, currentEulers.z);
+                // Mark that we have landed
+                m_Jumping = false;
+            }
         }
         // Accelerate if grounded
         if (m_Grounded && !m_Destabilizing && Time.time >= m_NextAccelerate && m_Rigidbody.velocity.magnitude < m_MaxSpeed)
@@ -98,37 +108,35 @@ public class SkateMovement : MonoBehaviour
             }
             else
             {
-                m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_AirPivotScalar);
 
                 if (m_Grounded)
                 {
-                    m_ManualSustain.torque = transform.right * m_ManualSustainScalar;
+                    m_ConstantForce.torque = transform.right * m_ConstantForceScalar;
+                    m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_PivotTorqueScalar);
                 }
                 else
                 {
-                    m_Rigidbody.AddTorque(transform.right * m_CurrentSpeed * m_AirPivotScalar);
+                    m_Rigidbody.AddTorque(transform.right * m_CurrentSpeed * m_PivotTorqueScalar * m_ForwardPivotScalar);
+                    //transform.Rotate(transform.right * m_CurrentSpeed * m_PivotRotateScalar * m_ForwardPivotScalar, Space.World);
+                    m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_PivotTorqueScalar);
+                    //transform.Rotate(transform.up * m_RotationSpeed * m_PivotRotateScalar, Space.World);
                 }
             }
         }
 
         // check if we need to reorient again but less agressively
-        bool flipped = !m_Destabilizing && (Math.Abs(transform.rotation.eulerAngles.x) > 180 || Math.Abs(transform.rotation.eulerAngles.z) > 180);
+        bool flipped = !m_Destabilizing && (Math.Abs(transform.localRotation.eulerAngles.x) > 180 || Math.Abs(transform.localRotation.eulerAngles.z) > 180);
         // if we need to reorient, continue flipping
         if (m_Reorienting || flipped)
         {
             m_Reorienting = true;
             // Slerp towards 0 x z
-            Quaternion currentRot = transform.rotation;
-            Quaternion targetRot = currentRot;
-            Vector3 targetEuler = targetRot.eulerAngles;
-            targetEuler.x = 0;
-            targetEuler.z = 0;
-            targetRot.eulerAngles = targetEuler;
+            Quaternion targetRot = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
 
-            transform.rotation = Quaternion.Slerp(currentRot, targetRot, Time.deltaTime * m_CorrectionFactor);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * m_CorrectionFactor);
 
             // Check if we are reoriented
-            if (Math.Abs(currentRot.eulerAngles.x) < 45 && Math.Abs(currentRot.eulerAngles.z) < 45)
+            if (Math.Abs(transform.rotation.eulerAngles.x) < 45 && Math.Abs(transform.rotation.eulerAngles.z) < 45)
             {
                 m_Reorienting = false;
                 Debug.Log("Reoriented");
@@ -137,8 +145,26 @@ public class SkateMovement : MonoBehaviour
 
         // Apply downward force on the board to keep it "stickier"(?)
         // Get CoM in world coords
-        Vector3 CoM = transform.position;// + m_Rigidbody.centerOfMass;
-        m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, CoM, ForceMode.Acceleration);
+        // m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, CoM, ForceMode.Acceleration);
+        // Vector3 CoM = transform.position;// + m_Rigidbody.centerOfMass;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag.Equals("ground"))
+        {
+            m_GroundedContacts++;
+            m_Grounded = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag.Equals("ground"))
+        {
+            m_GroundedContacts--;
+            m_Grounded = m_GroundedContacts > 0;
+        }
     }
 
     // Check each wheel to see if its currently grounded
@@ -186,8 +212,13 @@ public class SkateMovement : MonoBehaviour
     // add an upwards force
     void OnJump()
     {
-        // check if any wheels are grounded
         CheckGrounded();
+        m_Reorienting = !m_Destabilizing && (Math.Abs(transform.localRotation.x) >= 170 || Math.Abs(transform.localRotation.z) >= 170);
+        // check if any wheels are grounded
+        if (m_Reorienting)
+        {
+            Debug.Log("Reorienting, " + transform.rotation.x + ", " + transform.rotation.z);
+        }    
         // if not grounded, can't jump
         if (!m_Grounded)
         {
@@ -225,8 +256,13 @@ public class SkateMovement : MonoBehaviour
         }
         if (!m_Destabilizing)
         {
-            m_ManualSustain.torque = Vector3.zero;
+            m_ConstantForce.torque = Vector3.zero;
         }
+    }
+
+    void OnBoost(InputValue value)
+    {
+        m_ConstantForce.relativeForce = new Vector3(m_ConstantForce.relativeForce.x, m_ConstantForce.relativeForce.y, value.Get<float>() * m_BoostScalar);
     }
 
     /**

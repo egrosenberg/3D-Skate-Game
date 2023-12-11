@@ -70,11 +70,13 @@ public class GrindRail : MonoBehaviour
                 else
                 {
                     m_Grinding = false;
+                    m_ReactivateTime = Time.time + m_GrindCooldown;
                     // Set Player internal grinding flag
+                    m_GrindingPlayer.transform.rotation = m_NextRotation;
                     m_GrindingPlayer.GetComponent<SkateMovement>().OnGrindEnd();
                     Rigidbody playerRigidbody = m_GrindingPlayer.GetComponent<Rigidbody>();
                     playerRigidbody.isKinematic = false;
-                    playerRigidbody.AddForce(Vector3.forward * m_LaunchSpeed * (m_GrindingDirection ? 1: -1), ForceMode.VelocityChange);
+                    playerRigidbody.AddForce(m_GrindingPlayer.transform.forward * m_LaunchSpeed, ForceMode.VelocityChange);
                 }
             }
         }
@@ -98,7 +100,7 @@ public class GrindRail : MonoBehaviour
             }
             // Set grinding flag, update time to reactivate
             m_Grinding = true;
-            m_ReactivateTime = Time.time + m_GrindCooldown;
+            m_ReactivateTime = float.PositiveInfinity;
             // Set player member variable
             m_GrindingPlayer = collision.gameObject;
             // Set Player internal grinding flags
