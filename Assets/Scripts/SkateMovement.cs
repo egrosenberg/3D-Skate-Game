@@ -111,7 +111,7 @@ public class SkateMovement : MonoBehaviour
 
                 if (m_Grounded)
                 {
-                    m_ConstantForce.torque = transform.right * m_ConstantForceScalar;
+                    m_ConstantForce.relativeTorque = Vector3.right * m_ConstantForceScalar;
                     m_Rigidbody.AddTorque(transform.up * m_RotationSpeed * m_PivotTorqueScalar);
                 }
                 else
@@ -123,9 +123,16 @@ public class SkateMovement : MonoBehaviour
                 }
             }
         }
+        else if (!m_Destabilizing && m_Grounded)
+        {
+
+            m_ConstantForce.relativeTorque = Vector3.zero;
+        }
 
         // check if we need to reorient again but less agressively
-        bool flipped = !m_Destabilizing && (Math.Abs(transform.localRotation.eulerAngles.x) > 180 || Math.Abs(transform.localRotation.eulerAngles.z) > 180);
+        float xFabs = Math.Abs(transform.localRotation.x);
+        float zFabs = Math.Abs(transform.localRotation.z);
+        bool flipped = !m_Destabilizing && (xFabs >= 170 && xFabs <= 350 || zFabs >= 170 && zFabs <= 350);
         // if we need to reorient, continue flipping
         if (m_Reorienting || flipped)
         {
@@ -213,12 +220,6 @@ public class SkateMovement : MonoBehaviour
     void OnJump()
     {
         CheckGrounded();
-        m_Reorienting = !m_Destabilizing && (Math.Abs(transform.localRotation.x) >= 170 || Math.Abs(transform.localRotation.z) >= 170);
-        // check if any wheels are grounded
-        if (m_Reorienting)
-        {
-            Debug.Log("Reorienting, " + transform.rotation.x + ", " + transform.rotation.z);
-        }    
         // if not grounded, can't jump
         if (!m_Grounded)
         {
@@ -277,5 +278,9 @@ public class SkateMovement : MonoBehaviour
     {
         m_Grinding = false;
         m_BoardMesh.transform.localRotation = Quaternion.Euler(Vector3.zero);
+    }
+    public bool IsGrinding()
+    {
+        return m_Grinding;
     }
 }
