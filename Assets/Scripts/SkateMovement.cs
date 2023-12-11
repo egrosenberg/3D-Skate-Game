@@ -8,6 +8,7 @@ public class SkateMovement : MonoBehaviour
 {
     public Rigidbody m_Rigidbody;
     public GameObject m_BoardMesh;
+    public GameObject m_BoostTrail;
     public ConstantForce m_ConstantForce;
     public Wheel[] m_Wheels;
     public float m_SpeedScalar = 1000f;
@@ -61,6 +62,8 @@ public class SkateMovement : MonoBehaviour
 
         m_Rigidbody.maxAngularVelocity = m_MaxAngularV;
         m_Rigidbody.centerOfMass = m_CenterOfMass;
+
+        m_BoostTrail.SetActive(false);
     }
 
 
@@ -263,6 +266,7 @@ public class SkateMovement : MonoBehaviour
 
     void OnBoost(InputValue value)
     {
+        m_BoostTrail.SetActive(value.Get<float>() > 0);
         m_ConstantForce.relativeForce = new Vector3(m_ConstantForce.relativeForce.x, m_ConstantForce.relativeForce.y, value.Get<float>() * m_BoostScalar);
     }
 

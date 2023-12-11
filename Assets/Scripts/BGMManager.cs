@@ -15,32 +15,32 @@ public class BGMManager : MonoBehaviour
     {
         // Initialize the AudioSource component
         audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false; // We'll handle looping manually
+        audioSource.loop = true; // We'll handle looping manually
 
         // Set default volumes for each AudioClip
         audioSource.volume = (audioSource.clip == bgm1) ? defaultVolumeBGM1 : defaultVolumeBGM2;
 
-        PlayBGM(bgm1); // Start playing the first BGM
+        PlayBGM(bgm2); // Start playing the first BGM
     }
 
     private void Update()
     {
         // Check if the current BGM has finished playing
-        if (!audioSource.isPlaying)
-        {
-            // Switch to the other BGM and play it
-            if (audioSource.clip == bgm1)
-            {
-                PlayBGM(bgm2);
-            }
-            else
-            {
-                PlayBGM(bgm1);
-            }
-        }
-
-        // Manual Controls
-        HandleManualControls();
+        //if (!audioSource.isPlaying)
+        //{
+        //    // Switch to the other BGM and play it
+        //    if (audioSource.clip == bgm1)
+        //    {
+        //        PlayBGM(bgm2);
+        //    }
+        //    else
+        //    {
+        //        PlayBGM(bgm1);
+        //    }
+        //}
+        //
+        //// Manual Controls
+        //HandleManualControls();
     }
 
     private void PlayBGM(AudioClip clip)
