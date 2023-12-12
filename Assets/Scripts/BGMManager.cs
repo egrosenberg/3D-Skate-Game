@@ -84,6 +84,18 @@ public class BGMManager : MonoBehaviour
         audioSource.volume = newVolume;
     }
 
+    public void ToggleVolume()
+    {
+        if (audioSource.volume > 0)
+        {
+            audioSource.volume = 0;
+        }
+        else
+        {
+            audioSource.volume = defaultVolumeBGM1;
+        }
+    }
+
     // private void IncreaseVolume()
     // {
     //     // Increase the volume (clamp between 0 and 1)
