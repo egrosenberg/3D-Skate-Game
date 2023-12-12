@@ -54,10 +54,12 @@ public class GrindRail : MonoBehaviour
                 // Lerp position and rotation to next node
                 m_GrindingPlayer.transform.position = Vector3.Lerp(m_PrevPos, m_NextPos, m_GrindTimer);
                 // only rotate if locked rotation
-                if (m_LockRotation)
+                if (!m_LockRotation)
                 {
-                    m_GrindingPlayer.transform.rotation = Quaternion.Lerp(m_PrevRotation, m_NextRotation, m_GrindTimer);
+                    m_PrevRotation = Quaternion.Euler(m_PrevRotation.eulerAngles.x, m_GrindingPlayer.transform.rotation.eulerAngles.y, m_PrevRotation.eulerAngles.z);
+                    m_NextRotation = Quaternion.Euler(m_NextRotation.eulerAngles.x, m_GrindingPlayer.transform.rotation.eulerAngles.y, m_NextRotation.eulerAngles.z);
                 }
+                m_GrindingPlayer.transform.rotation = Quaternion.Lerp(m_PrevRotation, m_NextRotation, m_GrindTimer);
             }
             else
             {
