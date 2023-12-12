@@ -154,7 +154,7 @@ public class SkateMovement : MonoBehaviour
         // If we launched off of something
         if (!wasAirborn && !m_Grounded && !m_Jumping)
         {
-            m_AudSrc_NL.PlayJump();
+            //m_AudSrc_NL.PlayJump();
             m_AudSrc.PlayDestabilize();
         }
         // Accelerate if grounded
@@ -252,16 +252,15 @@ public class SkateMovement : MonoBehaviour
     {
         // Reset Grounded Status
         m_Grounded = false;
-        m_GroundedContacts = 0;
         // Check each wheel
         foreach (Wheel w in m_Wheels)
         {
             if (w.IsGrounded())
             {
                 m_Grounded = true;
-                m_GroundedContacts++;
             }
         }
+        m_Grounded |= m_GroundedContacts > 0;
     }
 
     // Set current forward momentum based on input if movement not locked

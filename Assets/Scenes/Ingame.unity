@@ -1765,6 +1765,10 @@ PrefabInstance:
       propertyPath: m_ConstantForceScalar
       value: -55000
       objectReference: {fileID: 0}
+    - target: {fileID: 7585569674526240448, guid: 81eb25e91e0cb8f4baee1b7c34551a01, type: 3}
+      propertyPath: m_TagString
+      value: ground
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 81eb25e91e0cb8f4baee1b7c34551a01, type: 3}
 --- !u!1 &1119708063
