@@ -41,6 +41,8 @@ public class SkateMovement : MonoBehaviour
     private bool        m_Grinding;           // True if player is currently in the middle of a grind
     private bool        m_GrindingCanRotate;  // Used to decide whether or not to respect rotation input while grinding
     private Quaternion  m_JumpRotation;       // Angle board was at as it left for a jump
+    private AudsrcMoving audsrc;
+    private AudsrcNoloop audsrc_nl;
 
     private void Start()
     {
@@ -64,6 +66,10 @@ public class SkateMovement : MonoBehaviour
         m_Rigidbody.centerOfMass = m_CenterOfMass;
 
         m_BoostTrail.SetActive(false);
+
+        audsrc = GameObject.Find("Audsrc").GetComponent<AudsrcMoving>();
+        audsrc_nl = GameObject.Find("Audsrc_noloop").GetComponent<AudsrcNoloop>();
+
     }
 
 
@@ -83,6 +89,7 @@ public class SkateMovement : MonoBehaviour
         {
             // Stop board from continuing to rotate
             m_Rigidbody.angularVelocity = Vector3.zero;
+
             // If we just landed from an inputted jump, snap to rotation based on recorded value
             if (m_Jumping)
             {
@@ -90,7 +97,9 @@ public class SkateMovement : MonoBehaviour
                 transform.rotation = Quaternion.Euler(currentEulers.x, m_JumpRotation.eulerAngles.y, currentEulers.z);
                 // Mark that we have landed
                 m_Jumping = false;
+                audsrc_nl.PlayLand();
             }
+            audsrc.PlayMoveGround();
         }
         // Accelerate if grounded
         if (m_Grounded && !m_Destabilizing && Time.time >= m_NextAccelerate && m_Rigidbody.velocity.magnitude < m_MaxSpeed)
@@ -152,6 +161,8 @@ public class SkateMovement : MonoBehaviour
                 Debug.Log("Reoriented");
             }
         }
+
+        audsrc.ModifyMovementSound(m_CurrentSpeed/m_MaxSpeed);
 
         // Apply downward force on the board to keep it "stickier"(?)
         // Get CoM in world coords
@@ -233,6 +244,8 @@ public class SkateMovement : MonoBehaviour
         // Make jump
         m_Jumping = true;
         m_Rigidbody.AddForce(transform.up * m_JumpStr);
+        audsrc_nl.PlayJump();
+        audsrc.PlayDestabilize();
     }
 
     /**
@@ -277,11 +290,15 @@ public class SkateMovement : MonoBehaviour
     {
         m_Grinding = true;
         m_GrindingCanRotate = canRotate;
+        audsrc_nl.PlayGrindEnter();
+        audsrc.PlayGrinding();
     }
     public void OnGrindEnd()
     {
         m_Grinding = false;
         m_BoardMesh.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        audsrc_nl.PlayGrindExit();
+        audsrc.PlayDestabilize();
     }
     public bool IsGrinding()
     {
