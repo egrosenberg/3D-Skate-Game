@@ -41,8 +41,8 @@ public class SkateMovement : MonoBehaviour
     private bool        m_Grinding;           // True if player is currently in the middle of a grind
     private bool        m_GrindingCanRotate;  // Used to decide whether or not to respect rotation input while grinding
     private Quaternion  m_JumpRotation;       // Angle board was at as it left for a jump
-    private AudsrcMoving audsrc;
-    private AudsrcNoloop audsrc_nl;
+    private AudsrcMoving m_AudSrc;
+    private AudsrcNoloop m_AudSrc_NL;
 
     private void Start()
     {
@@ -67,8 +67,8 @@ public class SkateMovement : MonoBehaviour
 
         m_BoostTrail.SetActive(false);
 
-        audsrc = GameObject.Find("Audsrc").GetComponent<AudsrcMoving>();
-        audsrc_nl = GameObject.Find("Audsrc_noloop").GetComponent<AudsrcNoloop>();
+        m_AudSrc = GameObject.Find("Audsrc").GetComponent<AudsrcMoving>();
+        m_AudSrc_NL = GameObject.Find("Audsrc_noloop").GetComponent<AudsrcNoloop>();
 
     }
 
@@ -97,11 +97,17 @@ public class SkateMovement : MonoBehaviour
                 transform.rotation = Quaternion.Euler(currentEulers.x, m_JumpRotation.eulerAngles.y, currentEulers.z);
                 // Mark that we have landed
                 m_Jumping = false;
-                audsrc_nl.PlayLand();
             }
             if (!m_Grinding) {
-                audsrc.PlayMoveGround();
+                m_AudSrc.PlayMoveGround();
             }
+            m_AudSrc_NL.PlayLand();
+        }
+        // If we launched off of something
+        if (!wasAirborn && !m_Grounded && !m_Jumping)
+        {
+            m_AudSrc_NL.PlayJump();
+            m_AudSrc.PlayDestabilize();
         }
         // Accelerate if grounded
         if (m_Grounded && !m_Destabilizing && Time.time >= m_NextAccelerate && m_Rigidbody.velocity.magnitude < m_MaxSpeed)
@@ -150,6 +156,7 @@ public class SkateMovement : MonoBehaviour
         // if we need to reorient, continue flipping
         if (m_Reorienting || flipped)
         {
+            Debug.Log("Reorienting");
             m_Reorienting = true;
             // Slerp towards 0 x z
             Quaternion targetRot = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
@@ -166,10 +173,10 @@ public class SkateMovement : MonoBehaviour
 
         // If not grinding, set the pitch based on the skateboard's velocity / max speed
         if (!m_Grinding) {
-            audsrc.ModifyMovementSound(m_Rigidbody.velocity.magnitude / m_MaxSpeed);
+            m_AudSrc.ModifyMovementSound(m_Rigidbody.velocity.magnitude / m_MaxSpeed);
         }
         else {
-            audsrc.ModifyMovementSound(1.0f);
+            m_AudSrc.ModifyMovementSound(1.0f);
         }
 
         // Apply downward force on the board to keep it "stickier"(?)
@@ -252,8 +259,8 @@ public class SkateMovement : MonoBehaviour
         // Make jump
         m_Jumping = true;
         m_Rigidbody.AddForce(transform.up * m_JumpStr);
-        audsrc_nl.PlayJump();
-        audsrc.PlayDestabilize();
+        m_AudSrc_NL.PlayJump();
+        m_AudSrc.PlayDestabilize();
     }
 
     /**
@@ -299,16 +306,16 @@ public class SkateMovement : MonoBehaviour
         m_Grinding = true;
         m_GrindingCanRotate = canRotate;
         // Debug.Log("STARTED GRIND!");
-        audsrc_nl.PlayGrindEnter();
-        audsrc.PlayGrinding();
+        m_AudSrc_NL.PlayGrindEnter();
+        m_AudSrc.PlayGrinding();
     }
     public void OnGrindEnd()
     {
         m_Grinding = false;
         m_BoardMesh.transform.localRotation = Quaternion.Euler(Vector3.zero);
         // Debug.Log("STOPPED GRIND!");
-        audsrc_nl.PlayGrindExit();
-        audsrc.PlayDestabilize();
+        m_AudSrc_NL.PlayGrindExit();
+        m_AudSrc.PlayDestabilize();
     }
     public bool IsGrinding()
     {

@@ -1,0 +1,120 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class BGMManager : MonoBehaviour
+{
+    public AudioClip bgm1;
+    public AudioClip bgm2;
+
+    public Slider volumeSlider; // Reference to the volume slider in the UI
+
+    // Set manual default volumes for each AudioClip
+    public float defaultVolumeBGM1 = 0.2f;
+    public float defaultVolumeBGM2 = 0.1f;
+
+    private AudioSource audioSource;
+
+    private void Start()
+    {
+        // Initialize the AudioSource component
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.loop = true; // We'll handle looping manually
+
+        // Set default volumes for each AudioClip
+        audioSource.volume = (audioSource.clip == bgm1) ? defaultVolumeBGM1 : defaultVolumeBGM2;
+
+<<<<<<< HEAD
+        PlayBGM(bgm2); // Start playing the first BGM
+=======
+        // Set up the volume slider callback
+        // volumeSlider.onValueChanged.AddListener(ChangeVolume);
+
+        PlayBGM(bgm1); // Start playing the first BGM
+>>>>>>> origin/map-and-ui
+    }
+
+    private void Update()
+    {
+        // Check if the current BGM has finished playing
+<<<<<<< HEAD
+        //if (!audioSource.isPlaying)
+        //{
+        //    // Switch to the other BGM and play it
+        //    if (audioSource.clip == bgm1)
+        //    {
+        //        PlayBGM(bgm2);
+        //    }
+        //    else
+        //    {
+        //        PlayBGM(bgm1);
+        //    }
+        //}
+        //
+        //// Manual Controls
+        //HandleManualControls();
+=======
+        if (!audioSource.isPlaying)
+        {
+            // Switch to the other BGM and play it
+            if (audioSource.clip == bgm1)
+            {
+                PlayBGM(bgm2);
+            }
+            else
+            {
+                PlayBGM(bgm1);
+            }
+        }
+
+        // // Manual Controls
+        // HandleManualControls();
+>>>>>>> origin/map-and-ui
+    }
+
+    private void PlayBGM(AudioClip clip)
+    {
+        // Set the new BGM clip and start playing
+        audioSource.clip = clip;
+        audioSource.Play();
+    }
+
+    // private void HandleManualControls()
+    // {
+    //     // Toggle between BGMs when pressing the 'Space' key
+    //     if (Input.GetKeyDown(KeyCode.Space))
+    //     {
+    //         ToggleBGM();
+    //     }
+    // }
+
+    private void ToggleBGM()
+    {
+        // Toggle between the two BGMs
+        if (audioSource.clip == bgm1)
+        {
+            PlayBGM(bgm2);
+        }
+        else
+        {
+            PlayBGM(bgm1);
+        }
+    }
+
+    public void ChangeVolume(float newVolume)
+    {
+        // Change the volume based on the slider value
+        audioSource.volume = newVolume;
+    }
+
+    // private void IncreaseVolume()
+    // {
+    //     // Increase the volume (clamp between 0 and 1)
+    //     audioSource.volume = Mathf.Clamp01(audioSource.volume + 0.05f);
+    // }
+
+    // private void DecreaseVolume()
+    // {
+    //     // Decrease the volume (clamp between 0 and 1)
+    //     audioSource.volume = Mathf.Clamp01(audioSource.volume - 0.05f);
+    // }
+}
