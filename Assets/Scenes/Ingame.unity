@@ -2009,8 +2009,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 173797321435262872, guid: 81eb25e91e0cb8f4baee1b7c34551a01, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 173797321435262872, guid: 81eb25e91e0cb8f4baee1b7c34551a01, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -18.3
+      value: -19.13
       objectReference: {fileID: 0}
     - target: {fileID: 173797321435262872, guid: 81eb25e91e0cb8f4baee1b7c34551a01, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2416,11 +2420,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f6edf9da8a2f884bbdf36b5486cbfe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bgm1: {fileID: 8300000, guid: eb98357acdf026b4198d0ea6cfb2c688, type: 3}
-  bgm2: {fileID: 8300000, guid: d25d5a437f3deea4b828a3f8d1a71d69, type: 3}
+  m_BackgroundMusic:
+  - {fileID: 8300000, guid: 6d4438a520969c347ac4f0c9ebf44328, type: 3}
+  - {fileID: 8300000, guid: dbfa002cd74e95f4a8b402cf080cf467, type: 3}
+  - {fileID: 8300000, guid: 77ffd3f037cc5c5438475bdc3ada645f, type: 3}
+  - {fileID: 8300000, guid: 8cdc521e088c41845b3146a4cee3b5d3, type: 3}
+  - {fileID: 8300000, guid: 98d29803411a7e948a35dbd5211ca4f7, type: 3}
+  - {fileID: 8300000, guid: 038f16dc7417edd4a85439c0aab684d4, type: 3}
   volumeSlider: {fileID: 272666589}
-  defaultVolumeBGM1: 0.2
-  defaultVolumeBGM2: 0.1
+  m_DefaultVolume: 0.2
 --- !u!4 &1248944012
 Transform:
   m_ObjectHideFlags: 0
