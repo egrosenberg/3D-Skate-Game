@@ -13,6 +13,7 @@ public class SkateMovement : MonoBehaviour
     public GameObject m_BoostTrail;
     public ConstantForce m_ConstantForce;
     public Wheel[] m_Wheels;
+    public ScoreManager m_ScoreManager;
     public float m_SpeedScalar = 1000f;
     public float m_BoostScalar = 1000f;
     public float m_RotationScalar = 0.1f;
@@ -30,6 +31,10 @@ public class SkateMovement : MonoBehaviour
     public float m_ManualSlamScalar = 1f;
     public float m_ConstantForceScalar = 1f;
     public float m_AccelerateInterval = 0.5f;
+    public float m_ScoreScalar = 1f;
+    public float m_ScoreSpinScalar = 1f;
+    public float m_ScoreGrindScalar = 2f;
+    public int m_MinScoreThreshold = 50;
     public Vector3 m_CenterOfMass = Vector3.zero;
 
 
@@ -38,6 +43,8 @@ public class SkateMovement : MonoBehaviour
     private float       m_RotationSpeed;      // Speed the rotation input is at
     private float       m_NextAccelerate;     // Used to track when to next push the board
     private int         m_GroundedContacts;   // Number of wheels touching the ground
+    private int         m_CurrentComboScore;  // The score in our current scoring combo
+    private int         m_TotalScore;         // The score for the whole session
     private bool        m_Destabilizing;      // If the board is currently in destabilizing mode
     private bool        m_Grounded;           // If the board currently has any wheels touching the ground
     private bool        m_Jumping;            // True if player has recently pressed jump input
@@ -64,6 +71,9 @@ public class SkateMovement : MonoBehaviour
         m_GroundedContacts = 0;
         m_NextAccelerate = Time.time;
 
+        m_CurrentComboScore = 0;
+        m_TotalScore = 0;
+
         // Initialize Jump rotation to starting position
         m_JumpRotation = transform.rotation;
 
@@ -83,12 +93,36 @@ public class SkateMovement : MonoBehaviour
         bool wasAirborn = !m_Grounded;
         CheckGrounded();
 
+        // Add Score
+        if (!m_Grounded || m_Grinding)
+        {
+            float score = m_ScoreScalar;
+            if (m_Grinding)
+            {
+                score *= m_ScoreGrindScalar;
+            }
+            else
+            {
+                score *= (m_Rigidbody.angularVelocity.magnitude+1) * m_ScoreSpinScalar;
+            }
+            m_CurrentComboScore += (int)score;
+            // Only display if above a certain threshold
+            if (m_CurrentComboScore >= m_MinScoreThreshold)
+            {
+                m_ScoreManager.latestScoreText.text = m_CurrentComboScore.ToString();
+            }
+        }
+
         // If grounded, apply constant downard force
         if (m_Grounded && !m_Destabilizing)
         {
             m_ConstantForce.relativeForce = new Vector3(m_ConstantForce.relativeForce.x, m_DownwardForce, m_ConstantForce.relativeForce.z);
         }
-        
+        else
+        {
+            m_ConstantForce.relativeForce = new Vector3(m_ConstantForce.relativeForce.x, 0, m_ConstantForce.relativeForce.z);
+        }
+
         // If we just landed:
         if (wasAirborn && m_Grounded)
         {
@@ -107,6 +141,15 @@ public class SkateMovement : MonoBehaviour
                 m_AudSrc.PlayMoveGround();
             }
             m_AudSrc_NL.PlayLand();
+
+            // End Combo
+            if (m_CurrentComboScore >= m_MinScoreThreshold)
+            {
+                m_TotalScore += m_CurrentComboScore;
+                m_ScoreManager.highScoreText.text = m_TotalScore.ToString();
+                m_ScoreManager.PlaySound();
+            }
+            m_CurrentComboScore = 0;
         }
         // If we launched off of something
         if (!wasAirborn && !m_Grounded && !m_Jumping)
@@ -183,11 +226,6 @@ public class SkateMovement : MonoBehaviour
         else {
             m_AudSrc.ModifyMovementSound(1.0f);
         }
-
-        // Apply downward force on the board to keep it "stickier"(?)
-        // Get CoM in world coords
-        // m_Rigidbody.AddForceAtPosition(transform.up * -1 * m_DownwardForce, CoM, ForceMode.Acceleration);
-        // Vector3 CoM = transform.position;// + m_Rigidbody.centerOfMass;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -278,7 +316,7 @@ public class SkateMovement : MonoBehaviour
     {
         CheckGrounded();
 
-        m_Destabilizing = value.Get<float>() > 0;
+        m_Destabilizing = value.Get<float>() > 0.5;
 
         if (m_Grounded)
         {
@@ -293,7 +331,7 @@ public class SkateMovement : MonoBehaviour
         }
         if (!m_Destabilizing)
         {
-            m_ConstantForce.torque = Vector3.zero;
+            m_ConstantForce.relativeTorque = Vector3.zero;
         }
     }
 

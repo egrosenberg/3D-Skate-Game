@@ -36,7 +36,7 @@
                     "name": "Destabilize",
                     "type": "PassThrough",
                     "id": "757a1b11-9783-4f08-ac3c-3e17e21c3494",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Analog",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -274,6 +274,39 @@
                     "name": "positive",
                     "id": "4c271cda-f7ef-482f-8ccc-6102fcfabcf5",
                     "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "6e365a6b-7758-4aaa-b871-3c8e1eebe7af",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "positive",
+                    "id": "0e0a6911-d720-45b6-bf01-8e42ddddddff",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "negative",
+                    "id": "0ddaa722-7fcd-41fe-ab5c-8d9206eef4b9",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

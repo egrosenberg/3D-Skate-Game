@@ -100,4 +100,13 @@ public class ScoreManager : MonoBehaviour
             TestResetScore();
         }
     }
+
+    public void PlaySound()
+    {
+        // Play the score increase sound
+        if (scoreIncreaseSound != null && scoreIncreaseClip != null)
+        {
+            scoreIncreaseSound.PlayOneShot(scoreIncreaseClip);
+        }
+    }
 }
