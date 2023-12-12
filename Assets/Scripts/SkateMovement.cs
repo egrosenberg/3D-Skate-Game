@@ -34,6 +34,7 @@ public class SkateMovement : MonoBehaviour
     public float m_ScoreScalar = 1f;
     public float m_ScoreSpinScalar = 1f;
     public float m_ScoreGrindScalar = 2f;
+    public float m_SFXcooldown = 0.5f;
     public int m_MinScoreThreshold = 50;
     public Vector3 m_CenterOfMass = Vector3.zero;
 
@@ -42,6 +43,7 @@ public class SkateMovement : MonoBehaviour
     private float       m_CurrentSpeed;       // Speed for forward input
     private float       m_RotationSpeed;      // Speed the rotation input is at
     private float       m_NextAccelerate;     // Used to track when to next push the board
+    private float       m_LastLandSFX;        // Tracks las time the land sfx was played
     private int         m_GroundedContacts;   // Number of wheels touching the ground
     private int         m_CurrentComboScore;  // The score in our current scoring combo
     private int         m_TotalScore;         // The score for the whole session
@@ -82,6 +84,7 @@ public class SkateMovement : MonoBehaviour
 
         m_BoostTrail.SetActive(false);
 
+        m_LastLandSFX = Time.time;
         m_AudSrc = GameObject.Find("Audsrc").GetComponent<AudsrcMoving>();
         m_AudSrc_NL = GameObject.Find("Audsrc_noloop").GetComponent<AudsrcNoloop>();
 
@@ -140,7 +143,12 @@ public class SkateMovement : MonoBehaviour
             if (!m_Grinding) {
                 m_AudSrc.PlayMoveGround();
             }
-            m_AudSrc_NL.PlayLand();
+            // Play landing sound effect
+            if (Time.time - m_LastLandSFX > m_SFXcooldown)
+            {
+                m_AudSrc_NL.PlayLand();
+                m_LastLandSFX = Time.time;
+            }
 
             // End Combo
             if (m_CurrentComboScore >= m_MinScoreThreshold)
@@ -300,7 +308,7 @@ public class SkateMovement : MonoBehaviour
         m_JumpRotation = transform.rotation;
         // Make jump
         m_Jumping = true;
-        m_Rigidbody.AddForce(transform.up * m_JumpStr);
+        m_Rigidbody.AddForce(Vector3.up * m_JumpStr);
         m_AudSrc_NL.PlayJump();
         m_AudSrc.PlayDestabilize();
     }
