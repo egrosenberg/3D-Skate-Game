@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 using TMPro;
 
 public class MenuController : MonoBehaviour
@@ -38,28 +39,50 @@ public class MenuController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape))
-        {
-            optionsMenu.SetActive(!optionsMenu.activeSelf);
-            background.SetActive(optionsMenu.activeSelf);
+        //if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    //optionsMenu.SetActive(!optionsMenu.activeSelf);
+        //    //background.SetActive(optionsMenu.activeSelf);
+        //
+        //    if (optionsMenu.activeSelf)
+        //    {
+        //        currentHighlightIndex = 0;
+        //        UpdateHighlights();
+        //        HandleSliderControls();
+        //    }
+        //}
 
-            if (optionsMenu.activeSelf)
-            {
-                currentHighlightIndex = 0;
-                UpdateHighlights();
-                HandleSliderControls();
-            }
-        }
-
-        if (optionsMenu.activeSelf)
-        {
-            HandleHighlightMovement();
-            HandleSliderControls();
-            HandleButtonPress();
-        }
+        //if (optionsMenu.activeSelf)
+        //{
+        //    HandleHighlightMovement();
+        //    HandleSliderControls();
+        //    HandleButtonPress();
+        //}
     }
 
-    private void HandleHighlightMovement()
+    public void OnActivate(InputValue value)
+    {
+        optionsMenu.SetActive(!optionsMenu.activeSelf);
+        background.SetActive(optionsMenu.activeSelf);
+    }
+
+    public void OnNavigate(InputValue axis)
+    {
+        float verticalInput = axis.Get<float>();
+
+        if (verticalInput > 0 && currentHighlightIndex > 0)
+        {
+            currentHighlightIndex--;
+        }
+        else if (verticalInput < 0 && currentHighlightIndex < highlights.Length - 1)
+        {
+            currentHighlightIndex++;
+        }
+
+        UpdateHighlights();
+    }
+
+    void HandleHighlightMovement()
     {
         float verticalInput = Input.GetAxisRaw("Vertical");
 
@@ -92,7 +115,7 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    private void HandleSliderControls()
+    public void OnAdjust(InputValue value)
     {
         if (!canChangeSlider) return;
 
@@ -107,13 +130,10 @@ public class MenuController : MonoBehaviour
 
         if (currentSlider != null)
         {
-            float horizontalInput = Input.GetAxisRaw("Horizontal");
+            float horizontalInput = value.Get<float>();
 
             if (horizontalInput != 0)
             {
-                canChangeSlider = false;
-                Invoke("EnableSliderChange", 0.1f); // Allow slider change after 0.1 seconds
-
                 float currentValue = currentSlider.value;
                 float newValue = Mathf.Clamp01(currentValue + horizontalInput * 0.1f); // Adjust sensitivity as needed
                 currentSlider.value = newValue;
@@ -129,19 +149,18 @@ public class MenuController : MonoBehaviour
         canChangeSlider = true;
     }
 
-    private void HandleButtonPress()
+    public bool HandleButtonPress()
     {
-        if (Input.GetButtonDown("Submit"))
+        if (currentHighlightIndex == highlights.Length - 2) // Continue button
         {
-            if (currentHighlightIndex == highlights.Length - 2) // Continue button
-            {
-                optionsMenu.SetActive(false);
-            }
-            else if (currentHighlightIndex == highlights.Length - 1) // Exit button
-            {
-                SceneManager.LoadScene("Menu");
-                Debug.Log("Exiting to Menu...");
-            }
+            optionsMenu.SetActive(false);
+            return false;
         }
+        else if (currentHighlightIndex == highlights.Length - 1) // Exit button
+        {
+            SceneManager.LoadScene("Menu");
+            Debug.Log("Exiting to Menu...");
+        }
+        return true;
     }
 }

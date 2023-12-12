@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class SkateMovement : MonoBehaviour
 {
+    public MenuController m_MenuController;
+    public PlayerInput m_PlayerInput;
     public Rigidbody m_Rigidbody;
     public GameObject m_BoardMesh;
     public GameObject m_BoostTrail;
@@ -30,6 +32,7 @@ public class SkateMovement : MonoBehaviour
     public float m_AccelerateInterval = 0.5f;
     public Vector3 m_CenterOfMass = Vector3.zero;
 
+
     private bool        m_Reorienting;        // If the board currently needs to reorient itself
     private float       m_CurrentSpeed;       // Speed for forward input
     private float       m_RotationSpeed;      // Speed the rotation input is at
@@ -40,6 +43,7 @@ public class SkateMovement : MonoBehaviour
     private bool        m_Jumping;            // True if player has recently pressed jump input
     private bool        m_Grinding;           // True if player is currently in the middle of a grind
     private bool        m_GrindingCanRotate;  // Used to decide whether or not to respect rotation input while grinding
+    private bool        m_InputMode;          // Tracks whether it is menu input or board input : board = true
     private Quaternion  m_JumpRotation;       // Angle board was at as it left for a jump
     private AudsrcMoving m_AudSrc;
     private AudsrcNoloop m_AudSrc_NL;
@@ -53,6 +57,7 @@ public class SkateMovement : MonoBehaviour
         m_Jumping = false;
         m_Grinding = false;
         m_GrindingCanRotate = false;
+        m_InputMode = true;
 
         m_CurrentSpeed = 0f;
         m_RotationSpeed = 0f;
@@ -296,6 +301,41 @@ public class SkateMovement : MonoBehaviour
     {
         m_BoostTrail.SetActive(value.Get<float>() > 0);
         m_ConstantForce.relativeForce = new Vector3(m_ConstantForce.relativeForce.x, m_ConstantForce.relativeForce.y, value.Get<float>() * m_BoostScalar);
+    }
+
+
+    private void OnPause(InputValue value)
+    {
+        if (m_InputMode)
+        {
+            m_PlayerInput.SwitchCurrentActionMap("Menu");
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            m_PlayerInput.SwitchCurrentActionMap("PlayerMovement");
+            Time.timeScale = 1f;
+        }
+        m_InputMode = !m_InputMode;
+        m_MenuController.OnActivate(value);
+    }
+    // Both of these call their corresponding function in the menu controller
+    void OnNavigate(InputValue value)
+    {
+        m_MenuController.OnNavigate(value);
+    }
+    void OnAdjust(InputValue value)
+    {
+        m_MenuController.OnAdjust(value);
+    }
+    void OnMenuPress(InputValue value)
+    {
+        if (!m_MenuController.HandleButtonPress())
+        {
+            m_InputMode = !m_InputMode;
+            m_PlayerInput.SwitchCurrentActionMap("PlayerMovement");
+            Time.timeScale = 1f;
+        }
     }
 
     /**
