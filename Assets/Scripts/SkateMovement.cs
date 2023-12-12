@@ -99,7 +99,9 @@ public class SkateMovement : MonoBehaviour
                 m_Jumping = false;
                 audsrc_nl.PlayLand();
             }
-            audsrc.PlayMoveGround();
+            if (!m_Grinding) {
+                audsrc.PlayMoveGround();
+            }
         }
         // Accelerate if grounded
         if (m_Grounded && !m_Destabilizing && Time.time >= m_NextAccelerate && m_Rigidbody.velocity.magnitude < m_MaxSpeed)
@@ -162,7 +164,13 @@ public class SkateMovement : MonoBehaviour
             }
         }
 
-        audsrc.ModifyMovementSound(m_CurrentSpeed/m_MaxSpeed);
+        // If not grinding, set the pitch based on the skateboard's velocity / max speed
+        if (!m_Grinding) {
+            audsrc.ModifyMovementSound(m_Rigidbody.velocity.magnitude / m_MaxSpeed);
+        }
+        else {
+            audsrc.ModifyMovementSound(1.0f);
+        }
 
         // Apply downward force on the board to keep it "stickier"(?)
         // Get CoM in world coords
@@ -290,6 +298,7 @@ public class SkateMovement : MonoBehaviour
     {
         m_Grinding = true;
         m_GrindingCanRotate = canRotate;
+        // Debug.Log("STARTED GRIND!");
         audsrc_nl.PlayGrindEnter();
         audsrc.PlayGrinding();
     }
@@ -297,6 +306,7 @@ public class SkateMovement : MonoBehaviour
     {
         m_Grinding = false;
         m_BoardMesh.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        // Debug.Log("STOPPED GRIND!");
         audsrc_nl.PlayGrindExit();
         audsrc.PlayDestabilize();
     }

@@ -5913,8 +5913,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgm1: {fileID: 8300000, guid: eb98357acdf026b4198d0ea6cfb2c688, type: 3}
   bgm2: {fileID: 8300000, guid: d25d5a437f3deea4b828a3f8d1a71d69, type: 3}
-  defaultVolumeBGM1: 0.2
-  defaultVolumeBGM2: 0.1
+  defaultVolumeBGM1: 0
+  defaultVolumeBGM2: 0
 --- !u!4 &1248944012
 Transform:
   m_ObjectHideFlags: 0

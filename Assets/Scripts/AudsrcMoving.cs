@@ -37,6 +37,7 @@ public class AudsrcMoving : MonoBehaviour
 
     public void PlayGrinding() {
         moveType = 3;
+        // audsrc.Stop();
         audsrc.clip = audioGrinding;
         audsrc.Play();
     }
@@ -50,18 +51,11 @@ public class AudsrcMoving : MonoBehaviour
             break;
 
             case 2:
-            audsrc.pitch = Mathf.Lerp(pitchMinDestabilize, pitchMaxDestabilize, velocity);
             break;
             
             case 3:
             audsrc.pitch = Mathf.Lerp(pitchMinGrinding, pitchMaxGrinding, velocity);
-            if (velocity < minSpeedVolume) {
-                audsrc.volume = 0;
-            }
-            else {
-                // volume = % of max speed reached / % of wheels on the ground
-                audsrc.volume = Mathf.Lerp(0, maxSpeedVolume - minSpeedVolume, velocity - minSpeedVolume);
-            }
+            audsrc.volume = Mathf.Lerp(0, maxSpeedVolume, velocity);
             break;
         }
     }
