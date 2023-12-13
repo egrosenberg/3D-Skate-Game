@@ -160,7 +160,7 @@ public class SkateMovement : MonoBehaviour
             m_CurrentComboScore = 0;
         }
         // If we launched off of something
-        if (!wasAirborn && !m_Grounded && !m_Jumping)
+        if (!wasAirborn && !m_Grounded && !m_Jumping && !m_Grinding)
         {
             //m_AudSrc_NL.PlayJump();
             m_AudSrc.PlayDestabilize();
